@@ -1,0 +1,32 @@
+{
+  "name": "cert-gen",
+  "version": "1.0.0",
+  "description": "Certification generator",
+  "main": "lib/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "build": "babel ./src --out-dir lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/assuming/cert-gen.git"
+  },
+  "keywords": [
+    "cert"
+  ],
+  "author": "ohmyxm <wmx2112@gmail.com> (http://ohmyxm.xyz)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/assuming/cert-gen/issues"
+  },
+  "homepage": "https://github.com/assuming/cert-gen#readme",
+  "devDependencies": {
+    "babel-cli": "^6.23.0",
+    "babel-plugin-transform-async-to-generator": "^6.22.0"
+  },
+  "dependencies": {
+    "pem": "^1.9.4"
+  }
+}
