@@ -15,7 +15,7 @@ class CertGenerator {
   }
 
   genRootCert(userSubject) {
-    createCSR(userSubject)
+    return createCSR(userSubject)
       .then(csrData => {
         const options = {
           csr: csrData.csr,
@@ -57,10 +57,14 @@ class CertGenerator {
   }
 
   _saveRootCert(content) {
-    fsPath.writeFile(this.rootCertPath, content, err => {
-      if (err) {
-        throw err
-      }
+    return new Promise((resolve, reject) => {
+      fsPath.writeFile(this.rootCertPath, content, err => {
+        if (!err) {
+          resolve(true)
+        } else {
+          reject(err)
+        }
+      })
     })
   }
   _saveUserCert(content, hostname) {

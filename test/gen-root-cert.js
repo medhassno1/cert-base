@@ -1,20 +1,27 @@
 const test = require('tape')
-// const CertGenerator = require('../lib/index.js')
+const CertGenerator = require('../lib/index.js')
 
-// const cg = new CertGenerator({
-//   path: 'certs'
-// })
+/*
+ * Init cert generator with storing path
+ */
 
-// cg.genRootCert({
-//   commonName: 'my-common-name'
-// })
+const cg = new CertGenerator({
+  path: 'certs'
+})
 
-test('example test', function(t) {
+/*
+ * Test cases
+ */
+
+test('generate root cert', function(t) {
   t.plan(1)
 
-  t.equal(typeof Date.now, 'function')
-  // const start = Date.now()
-  // setTimeout(function () {
-  //   t.equal(Date.now() - start, 104)
-  // }, 100)
+  const subject = {
+    commonName: 'my-test-common-name'
+  }
+
+  cg.genRootCert(subject)
+    .then(result => {
+      t.equal(result, true)
+    })
 })
