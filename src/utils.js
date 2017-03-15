@@ -1,12 +1,11 @@
 const pem = require('pem')
+const fsPath = require('fs-path')
+const fs = require('fs')
 
 const defaultSubject = {
   country: 'CN',
   organization: 'Transfer',
-  organizationUnit: 'Transfer Proxy Certification',
-  // state: 'Beijing',
-  // emailAddress: 'transfer@gmail.com',
-  // locality: 'Beijing',
+  organizationUnit: 'Transfer Proxy Certification'
 }
 
 exports.createCSR = function(subject) {
@@ -43,11 +42,26 @@ exports.createCertificate = function(options) {
   })
 }
 
-exports.readCertificateInfo = function(certContent) {
+exports.writeFiles = function(fileDataList) {
+  const _list = fileDataList.map(data => {
+    return new Promise((resolve, reject) => {
+      fsPath.writeFile(data.path, data.content, err => {
+        if (!err) {
+          resolve(true)
+        } else {
+          reject(err)
+        }
+      })
+    })
+  })
+
+  return Promise.all(_list)
+}
+exports.readFile = function(filepath) {
   return new Promise((resolve, reject) => {
-    pem.readCertificateInfo(certContent, (err, result) => {
+    fs.readFile(filepath, 'utf8', (err, data) => {
       if (!err) {
-        resolve(result)
+        resolve(data)
       } else {
         reject(err)
       }

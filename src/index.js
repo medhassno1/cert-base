@@ -1,80 +1,106 @@
-const fs = require('fs')
-const fsPath = require('fs-path')
 const pem = require('pem')
 const {
   createCSR, 
   createCertificate,
-  readCertificateInfo
+  readCertificateInfo,
+  writeFiles,
+  readFile
 } = require('./utils.js')
+
+/**
+ * Constants
+ */
+
+const CA_ROOT_NAME = '##ca##'
+
+/**
+ * Certs storing location:
+ *
+ * CA cert also known as 'root cert' is stored along with CA key under:
+ * ${this.path}/ca-pkg
+ *
+ * User certs are stored along with keys under:
+ * ${this.path}/${hostname}-pkg
+ */
 
 class CertGenerator {
   constructor(config) {
     this.path = config.path
-    this.rootCertPath = `${config.path}/certgen-root-cert.crt`
-    this.signedCertsPath = `${this.path}/signed-certs`
   }
 
-  genRootCert(userSubject) {
-    return createCSR(userSubject)
-      .then(csrData => {
-        const options = {
-          csr: csrData.csr,
-          clientKey: csrData.clientKey,
-          selfSigned: true
-        }
-        return createCertificate(options)
-      })
-      .then(certData => this._saveRootCert(certData.certificate))
-      .catch(e => {
-        if (e) {
-          throw e
-        }
-      })
+  async makeCACert(userSubject) {
+    let certData = ''
+
+    try {
+      const csrData = await createCSR(userSubject)
+      const options = {
+        csr: csrData.csr,
+        clientKey: csrData.clientKey,
+        selfSigned: true
+      }
+
+      certData = await createCertificate(options)
+    } catch (e) {
+      throw e
+    }
+
+    return this._save({
+      key: certData.serviceKey,
+      cert: certData.certificate
+    })
   }
-  genCertByHost(userSubject) {
+  async makeUserCert(userSubject) {
+    let certData = ''
     // get hostname for the final file name
     const _hostname = userSubject.commonName
+    const caKeyPath = this.getCert().key
+    
+    try {
+      const keyContent = await readFile(caKeyPath)
+      const csrData = await createCSR(userSubject)
 
-    fs.readFile(this.rootCertPath, 'utf8', (err, data) => {
-      if (err) {
-        throw err
+      const options = {
+        csr: csrData.csr,
+        serviceKey: keyContent
       }
-      
-      console.log(data)
-      // createCSR(userSubject)
-      //   .then(csrData => {
-      //     const options = {
-      //       csr: csrData.csr
-      //       serviceKey: 
-      //     }
-      //     return createCertificate(options)
-      //   })
-      //   .then(certData => this._saveUserCert(certData.certificate, _hostname))
-    })
-  }
-  getCertPathByHost(hostname) {
-    return `${this.signedCertsPath}/${hostname}.crt`
+
+      certData = await createCertificate(options)
+    } catch (e) {
+      throw e
+    }
+
+    return this._save({
+      key: certData.clientKey,
+      cert: certData.certificate
+    }, _hostname)
   }
 
-  _saveRootCert(content) {
-    return new Promise((resolve, reject) => {
-      fsPath.writeFile(this.rootCertPath, content, err => {
-        if (!err) {
-          resolve(true)
-        } else {
-          reject(err)
-        }
-      })
-    })
+  // cert access
+  getCert(name=CA_ROOT_NAME) {
+    return {
+      key: this._makePath(name, 'key'),
+      cert: this._makePath(name, 'cert')
+    }
   }
-  _saveUserCert(content, hostname) {
-    const _path = `${this.signedCertsPath}/${hostname}`
+  // just an alias for getCert() when no param
+  getRootCert() {
+    return this.getCert()
+  }
 
-    fsPath.writeFile(_path, content, err => {
-      if (err) {
-        throw err
-      }
-    })
+  _save(data, name=CA_ROOT_NAME) {
+    const fileDataList = [{
+      content: data.key,
+      path: this._makePath(name, 'key')
+    }, {
+      content: data.cert,
+      path: this._makePath(name, 'cert')
+    }]
+     
+    return writeFiles(fileDataList)
+  }
+  _makePath(name, type) {
+    const ext = type === 'cert' ? 'crt' : 'key'
+    return `${this.path}/${name}-pkg/${name}-${type}.${ext}`
   }
 }
 
