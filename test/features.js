@@ -11,7 +11,7 @@ const TEST_HOSTNAME = 'ohmyxm.xyz'
  * Init cert generator with storing path
  */
 
-const cg = new CertBase({
+const cb = new CertBase({
   path: testCertPath
 })
 
@@ -23,7 +23,7 @@ const cg = new CertBase({
 test('removeAllCerts: prepare test environment', function(t) {
   t.plan(1)
 
-  cg.removeAllCerts()
+  cb.removeAllCerts()
     .then(result => {
       t.equal(result, true)
     })
@@ -39,17 +39,17 @@ test('removeAllCerts: prepare test environment', function(t) {
 test('isCAExist: no CA exists', function(t) {
   t.plan(1)
 
-  t.equal(cg.isCAExist(), false)
+  t.equal(cb.isCAExist(), false)
 })
 test('getCACert: no CA exists', function(t) {
   t.plan(1)
-  t.throws(cg.getCACert)
+  t.throws(cb.getCACert)
 })
 
 test('createCAcert', function(t) {
   t.plan(2)
 
-  cg.createCACert(TEST_CA_NAME)
+  cb.createCACert(TEST_CA_NAME)
     .then(result => {
       // both key and cert file should exist
       t.equal(fs.existsSync(result.key), true)
@@ -63,12 +63,12 @@ test('createCAcert', function(t) {
 test('isCAExist: CA exists', function(t) {
   t.plan(1)
 
-  t.equal(cg.isCAExist(), true)
+  t.equal(cb.isCAExist(), true)
 })
 test('getCACert: CA exists', function(t) {
   t.plan(2)
 
-  const ca = cg.getCACert()
+  const ca = cb.getCACert()
 
   t.equal(fs.existsSync(ca.key), true)
   t.equal(fs.existsSync(ca.cert), true)
@@ -81,7 +81,7 @@ test('getCACert: CA exists', function(t) {
 test('getCertByHost', function(t) {
   t.plan(2)
 
-  cg.getCertByHost(TEST_HOSTNAME)
+  cb.getCertByHost(TEST_HOSTNAME)
     .then(result => {
       t.equal(fs.existsSync(result.key), true)
       t.equal(fs.existsSync(result.cert), true)
@@ -94,7 +94,7 @@ test('getCertByHost', function(t) {
 test('removeCert', function(t) {
   t.plan(1)
 
-  cg.removeCert(TEST_HOSTNAME)
+  cb.removeCert(TEST_HOSTNAME)
     .then(result => {
       t.equal(result, true)
     })
@@ -110,7 +110,7 @@ test('removeCert', function(t) {
 test('removeAllCerts: clean up test certs', function(t) {
   t.plan(1)
   
-  cg.removeAllCerts()
+  cb.removeAllCerts()
     .then(result => {
       t.equal(result, true)
     })

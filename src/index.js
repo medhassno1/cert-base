@@ -18,8 +18,8 @@ const {
 const CA_ROOT_NAME = '##ca##'
 const defaultSubject = {
   country: 'CN',
-  organization: 'Transfer',
-  organizationUnit: 'Transfer Proxy Certification'
+  organization: 'CertBase',
+  organizationUnit: 'CertBase Certification'
 }
 
 /**

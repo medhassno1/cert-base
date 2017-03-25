@@ -1,11 +1,8 @@
 {
-  "name": "cert-gen",
+  "name": "cert-base",
   "version": "1.0.0",
-  "description": "Certification generator",
+  "description": "Certification generator and manager",
   "main": "lib/index.js",
-  "directories": {
-    "test": "test"
-  },
   "scripts": {
     "dev": "babel -w ./src --out-dir lib",
     "build": "babel ./src --out-dir lib",
@@ -13,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/assuming/cert-gen.git"
+    "url": "git+https://github.com/assuming/cert-base.git"
   },
   "keywords": [
     "cert"
@@ -21,9 +18,9 @@
   "author": "ohmyxm <wmx2112@gmail.com> (http://ohmyxm.xyz)",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/assuming/cert-gen/issues"
+    "url": "https://github.com/assuming/cert-base/issues"
   },
-  "homepage": "https://github.com/assuming/cert-gen#readme",
+  "homepage": "https://github.com/assuming/cert-base#readme",
   "devDependencies": {
     "babel-cli": "^6.23.0",
     "babel-plugin-transform-async-to-generator": "^6.22.0",
