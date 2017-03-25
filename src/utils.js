@@ -1,21 +1,15 @@
 const pem = require('pem')
 const fsPath = require('fs-path')
 const fs = require('fs')
+const rimraf = require('rimraf')
 
-const defaultSubject = {
-  country: 'CN',
-  organization: 'Transfer',
-  organizationUnit: 'Transfer Proxy Certification'
-}
+/**
+ * Pem operation wrapper
+ */
 
 exports.createCSR = function(subject) {
-  const _subject = {
-    ...defaultSubject,
-    ...subject
-  }
-
   return new Promise((resolve, reject) => {
-    pem.createCSR(_subject, (err, result) => {
+    pem.createCSR(subject, (err, result) => {
       if (!err) {
         resolve(result)
       } else {
@@ -42,26 +36,39 @@ exports.createCertificate = function(options) {
   })
 }
 
-exports.writeFiles = function(fileDataList) {
-  const _list = fileDataList.map(data => {
-    return new Promise((resolve, reject) => {
-      fsPath.writeFile(data.path, data.content, err => {
-        if (!err) {
-          resolve(true)
-        } else {
-          reject(err)
-        }
-      })
+/**
+ * Utils
+ */
+
+exports.writeFile = function(data) {
+  return new Promise((resolve, reject) => {
+    fsPath.writeFile(data.path, data.content, err => {
+      if (!err) {
+        resolve(data.path)
+      } else {
+        reject(err)
+      }
     })
   })
-
-  return Promise.all(_list)
 }
+
 exports.readFile = function(filepath) {
   return new Promise((resolve, reject) => {
     fs.readFile(filepath, 'utf8', (err, data) => {
       if (!err) {
         resolve(data)
+      } else {
+        reject(err)
+      }
+    })
+  })
+}
+
+exports.rimraf = function(path) {
+  return new Promise((resolve, reject) => {
+    rimraf(path, err => {
+      if (!err) {
+        resolve(true)
       } else {
         reject(err)
       }
