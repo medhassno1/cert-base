@@ -3,6 +3,10 @@ const path = require('path')
 const test = require('tape')
 const CertBase = require('../lib/index.js')
 
+/**
+ * Constants
+ */
+
 const testCertPath = path.join(__dirname, './certs')
 const TEST_CA_NAME = 'test_ca'
 const TEST_HOSTNAME = 'ohmyxm.xyz'
@@ -14,7 +18,6 @@ const TEST_HOSTNAME = 'ohmyxm.xyz'
 const cb = new CertBase({
   path: testCertPath
 })
-
 
 /**
  * Remove all certs and prepare to test
