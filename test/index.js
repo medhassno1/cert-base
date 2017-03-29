@@ -9,7 +9,7 @@ const CertBase = require('../lib/index.js')
 
 const testCertPath = path.join(__dirname, './certs')
 const TEST_CA_NAME = 'test_ca'
-const TEST_HOSTNAME = 'ohmyxm.xyz'
+const TEST_HOSTNAME = 'baidu.com'
 
 /**
  * Init cert generator with storing path
@@ -46,7 +46,8 @@ test('isCAExist: no CA exists', function(t) {
 })
 test('getCACert: no CA exists', function(t) {
   t.plan(1)
-  t.throws(cb.getCACert)
+  cb.getCACert()
+    .catch(e => t.ok(e))
 })
 
 test('createCAcert', function(t) {
@@ -55,8 +56,8 @@ test('createCAcert', function(t) {
   cb.createCACert(TEST_CA_NAME)
     .then(result => {
       // both key and cert file should exist
-      t.equal(fs.existsSync(result.key), true)
-      t.equal(fs.existsSync(result.cert), true)
+      t.equal(result.key.length > 0, true)
+      t.equal(result.cert.length > 0, true)
     })
     .catch(e => {
       throw e
@@ -71,10 +72,14 @@ test('isCAExist: CA exists', function(t) {
 test('getCACert: CA exists', function(t) {
   t.plan(2)
 
-  const ca = cb.getCACert()
-
-  t.equal(fs.existsSync(ca.key), true)
-  t.equal(fs.existsSync(ca.cert), true)
+  cb.getCACert()
+    .then(result => {
+      t.equal(result.key.length > 0, true)
+      t.equal(result.cert.length > 0, true)
+    })
+    .catch(e => {
+      throw e
+    })
 })
 
 /**
@@ -86,8 +91,8 @@ test('getCertByHost', function(t) {
 
   cb.getCertByHost(TEST_HOSTNAME)
     .then(result => {
-      t.equal(fs.existsSync(result.key), true)
-      t.equal(fs.existsSync(result.cert), true)
+      t.equal(result.key.length > 0, true)
+      t.equal(result.cert.length > 0, true)
     })
     .catch(e => {
       throw e

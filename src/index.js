@@ -47,42 +47,39 @@ class CertBase {
       throw CA_EXIST
     }
     
-    let certData = ''
     const subject = {
       ...this.defaultSubject,
       commonName: commonName
     }
 
-    try {
-      const csrData = await createCSR(subject)
-      const options = {
-        csr: csrData.csr,
-        clientKey: csrData.clientKey,
-        selfSigned: true
-      }
-
-      certData = await createCertificate(options)
-    } catch (e) {
-      throw e
+    const csrData = await createCSR(subject)
+    const options = {
+      csr: csrData.csr,
+      clientKey: csrData.clientKey,
+      selfSigned: true
     }
+    const certData = await createCertificate(options)
 
     return this._save(certData)
   }
 
-  getCACert() {
+  async getCACert() {
+    let key, cert
+
     if (this.isCAExist()) {
-      return {
-        key: this._makePath(CA_ROOT_NAME, 'key'),
-        cert: this._makePath(CA_ROOT_NAME, 'cert')
-      }
+      key = await readFile(this._makePath(CA_ROOT_NAME, 'key'))
+      cert = await readFile(this._makePath(CA_ROOT_NAME, 'cert'))
     } else {
       throw CA_NOT_EXIST
+    }
+
+    return {
+      key: key,
+      cert: cert
     }
   }
 
   async getCertByHost(hostname) {
-    const caKeyPath = this.getCACert().key
-
     // if exist, return current cert and key
     if (this._isExist(hostname)) {
       return {
@@ -92,50 +89,30 @@ class CertBase {
     }
     
     // if not, create one
-    let certData = ''
     const subject = {
       ...this.defaultSubject,
       commonName: hostname
     }
+    
+    const caKey = this.getCACert().key
+    const csrData = await createCSR(subject)
 
-    try {
-      const keyContent = await readFile(caKeyPath)
-      const csrData = await createCSR(subject)
-
-      const options = {
-        csr: csrData.csr,
-        serviceKey: keyContent
-      }
-
-      certData = await createCertificate(options)
-    } catch (e) {
-      throw e
+    const options = {
+      csr: csrData.csr,
+      serviceKey: caKey
     }
-
+    const certData = await createCertificate(options)
+    
     return this._save(certData, hostname)
   }
 
   async removeAllCerts() {
-    let result = false
-
-    try {
-      result = await rimraf(this.path)
-    } catch (e) {
-      throw e
-    }
-
+    const result = await rimraf(this.path)
     return result
   }
 
   async removeCert(hostname) {
-    let result = false
-    
-    try {
-      result = await rimraf(this._makeFolderPath(hostname))
-    } catch (e) {
-      throw e
-    }
-
+    const result = await rimraf(this._makeFolderPath(hostname))
     return result
   }
 
@@ -146,8 +123,6 @@ class CertBase {
   // utils
 
   async _save(certData, name=CA_ROOT_NAME) {
-    let keyPath, certPath
-
     const keyFileData = {
       content: certData.serviceKey,
       path: this._makePath(name, 'key')
@@ -157,16 +132,12 @@ class CertBase {
       path: this._makePath(name, 'cert')
     }
     
-    try {
-      keyPath = await writeFile(keyFileData)
-      certPath = await writeFile(certFileData)
-    } catch (e) {
-      throw e
-    }
+    const key = await writeFile(keyFileData)
+    const cert = await writeFile(certFileData)
     
     return {
-      key: keyPath,
-      cert: certPath
+      key: key,
+      cert: cert
     }
   }
   _isExist(name=CA_ROOT_NAME) {
