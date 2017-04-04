@@ -8,15 +8,16 @@ const CertBase = require('../lib/index.js')
  */
 
 const testCertPath = path.join(__dirname, './certs')
-const TEST_CA_NAME = 'test_ca'
-const TEST_HOSTNAME = 'baidu.com'
+const TEST_CA_NAME = 'CertBase CA Test'
+const TEST_HOSTNAME = 'www.baidu.com'
 
 /**
  * Init cert generator with storing path
  */
 
 const cb = new CertBase({
-  path: testCertPath
+  path: testCertPath,
+  // opensslPath: 
 })
 
 /**
@@ -49,7 +50,19 @@ test('getCACert: no CA exists', function(t) {
   cb.getCACert()
     .catch(e => t.ok(e))
 })
+test('listCerts: no cert exist', function(t) {
+  t.plan(1)
 
+  cb.listCerts()
+    .then(result => {
+      t.notOk(result.ca, 'no certs')
+    })
+    .catch(e => {
+      throw e
+    })
+})
+
+// create CA
 test('createCAcert', function(t) {
   t.plan(2)
 
@@ -81,6 +94,18 @@ test('getCACert: CA exists', function(t) {
       throw e
     })
 })
+test('listCerts: only ca exist', function(t) {
+  t.plan(2)
+
+  cb.listCerts()
+    .then(result => {
+      t.ok(result.ca, 'ca cert')
+      t.ok(result.certs.length === 0, 'no user cert')
+    })
+    .catch(e => {
+      throw e
+    })
+})
 
 /**
  * Cert signing methods
@@ -99,6 +124,18 @@ test('getCertByHost', function(t) {
     })
 })
 
+test('listCerts: 1 user certs', function(t) {
+  t.plan(2)
+
+  cb.listCerts()
+    .then(result => {
+      t.ok(result.ca, 'ca cert')
+      t.ok(result.certs.length > 0, 'user cert')
+    })
+    .catch(e => {
+      throw e
+    })
+})
 test('removeCert', function(t) {
   t.plan(1)
 

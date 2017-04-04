@@ -1,43 +1,9 @@
-const pem = require('pem')
-const fsPath = require('fs-path')
 const fs = require('fs')
 const rimraf = require('rimraf')
+const fsPath = require('fs-path')
 
 /**
- * Pem operation wrapper
- */
-
-exports.createCSR = function(subject) {
-  return new Promise((resolve, reject) => {
-    pem.createCSR(subject, (err, result) => {
-      if (!err) {
-        resolve(result)
-      } else {
-        reject(err)
-      }
-    })
-  })
-}
-
-exports.createCertificate = function(options) {
-  const _options = { 
-    days: 36500, 
-    ...options
-  }
-
-  return new Promise((resolve, reject) => {
-    pem.createCertificate(_options, (err, result) => {
-      if (!err) {
-        resolve(result)
-      } else {
-        reject(err)
-      }
-    })
-  })
-}
-
-/**
- * Utils
+ * Utils function
  */
 
 exports.writeFile = function(data) {
@@ -57,6 +23,18 @@ exports.readFile = function(filepath) {
     fs.readFile(filepath, 'utf8', (err, data) => {
       if (!err) {
         resolve(data)
+      } else {
+        reject(err)
+      }
+    })
+  })
+}
+
+exports.readDir = function(dirpath) {
+  return new Promise((resolve, reject) => {
+    fs.readdir(dirpath, (err, files) => {
+      if (!err) {
+        resolve(files)
       } else {
         reject(err)
       }

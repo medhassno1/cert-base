@@ -1,15 +1,8 @@
 const fs = require('fs')
-const {
-  createCSR, 
-  createCertificate,
-  writeFile,
-  readFile,
-  rimraf
-} = require('./utils.js')
-const { 
-  CA_EXIST,
-  CA_NOT_EXIST 
-} = require('./errors.js')
+const path = require('path')
+const Pem = require('./pem.js')
+const { writeFile, readFile, readDir, rimraf } = require('./utils.js')
+const { CA_EXIST, CA_NOT_EXIST } = require('./errors.js')
 
 /**
  * Constants
@@ -21,15 +14,17 @@ const defaultSubject = {
   organization: 'CertBase',
   organizationUnit: 'CertBase Certification'
 }
+const caSSLCnfPath = path.join(__dirname, '../configs/ca.ext')
+const userSSLCnfPath = path.join(__dirname, '../configs/user.ext')
 
 /**
  * Certs storing location:
  *
  * CA cert also known as 'root cert' is stored along with CA key under:
- * ${this.path}/##ca##-pkg
+ * ${this.path}/##ca##
  *
  * User certs are stored along with keys under:
- * ${this.path}/${hostname}-pkg
+ * ${this.path}/${hostname}
  */
 
 class CertBase {
@@ -39,6 +34,7 @@ class CertBase {
       ...defaultSubject,
       ...options.subject
     }
+    this.pem = new Pem(options.opensslPath)
   }
 
   async createCACert(commonName) {
@@ -52,13 +48,14 @@ class CertBase {
       commonName: commonName
     }
 
-    const csrData = await createCSR(subject)
+    const csrData = await this.pem.createCSR(subject)
     const options = {
       csr: csrData.csr,
       clientKey: csrData.clientKey,
-      selfSigned: true
+      selfSigned: true,
+      extFile: caSSLCnfPath
     }
-    const certData = await createCertificate(options)
+    const certData = await this.pem.createCertificate(options)
 
     return this._save(certData)
   }
@@ -94,14 +91,17 @@ class CertBase {
       commonName: hostname
     }
     
-    const caKey = this.getCACert().key
-    const csrData = await createCSR(subject)
+    const caPair = await this.getCACert()
+    const csrData = await this.pem.createCSR(subject)
 
     const options = {
       csr: csrData.csr,
-      serviceKey: caKey
+      clientKey: csrData.clientKey,
+      serviceKey: caPair.key,
+      serviceCertificate: caPair.cert,
+      extFile: userSSLCnfPath
     }
-    const certData = await createCertificate(options)
+    const certData = await this.pem.createCertificate(options)
     
     return this._save(certData, hostname)
   }
@@ -116,6 +116,25 @@ class CertBase {
     return result
   }
 
+  async listCerts() {
+    let files, certs = {}
+
+    try {
+      files = await readDir(this.path)
+
+      if (files.length >= 1) {
+        certs = {
+          ca: CA_ROOT_NAME,
+          certs: []
+        }
+        
+        certs.certs = files.filter(name => name !== CA_ROOT_NAME)
+      }
+    } catch (e) {}
+
+    return certs
+  }
+
   isCAExist() {
     return this._isExist()
   }
@@ -124,7 +143,7 @@ class CertBase {
 
   async _save(certData, name=CA_ROOT_NAME) {
     const keyFileData = {
-      content: certData.serviceKey,
+      content: certData.clientKey,
       path: this._makePath(name, 'key')
     }
     const certFileData = {
@@ -147,10 +166,10 @@ class CertBase {
   }
   _makePath(name, type) {
     const ext = type === 'cert' ? 'crt' : 'key'
-    return `${this._makeFolderPath(name)}/${name}-${type}.${ext}`
+    return path.join(this._makeFolderPath(name), `${name}-${type}.${ext}`)
   }
   _makeFolderPath(name) {
-    return `${this.path}/${name}-pkg`
+    return path.join(this.path, `${name}`)
   }
 }
 

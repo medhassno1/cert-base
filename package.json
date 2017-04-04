@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "babel -w ./src --out-dir lib",
     "build": "babel ./src --out-dir lib",
-    "test": "tape ./test/*.js | tap-notify | tap-diff"
+    "test": "tape ./test/index.js | tap-notify | tap-diff",
+    "transfer": "tape ./test/transfer-test.js | tap-notify | tap-diff"
   },
   "repository": {
     "type": "git",
@@ -25,6 +26,7 @@
     "babel-cli": "^6.23.0",
     "babel-plugin-transform-async-to-generator": "^6.22.0",
     "babel-plugin-transform-object-rest-spread": "^6.23.0",
+    "mac-open": "^0.1.3",
     "tape": "^4.6.3"
   },
   "dependencies": {
