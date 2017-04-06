@@ -1,13 +1,14 @@
 const fs = require('fs')
 const path = require('path')
 const test = require('tape')
+const { emp } = require('emp')
 const CertBase = require('../lib/index.js')
 
 /**
  * Constants
  */
 
-const testCertPath = path.join(__dirname, './certs')
+const testCertPath = path.join(__dirname, '../certs')
 const TEST_CA_NAME = 'CertBase CA Test'
 const TEST_HOSTNAME = 'www.baidu.com'
 
@@ -153,13 +154,6 @@ test('removeCert', function(t) {
  */
 
 test('removeAllCerts: clean up test certs', function(t) {
-  t.plan(1)
-  
-  cb.removeAllCerts()
-    .then(result => {
-      t.equal(result, true)
-    })
-    .catch(e => {
-      throw e
-    })
+  emp(testCertPath, true)
+  t.end()
 })

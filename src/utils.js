@@ -1,5 +1,4 @@
 const fs = require('fs')
-const rimraf = require('rimraf')
 const fsPath = require('fs-path')
 
 /**
@@ -35,18 +34,6 @@ exports.readDir = function(dirpath) {
     fs.readdir(dirpath, (err, files) => {
       if (!err) {
         resolve(files)
-      } else {
-        reject(err)
-      }
-    })
-  })
-}
-
-exports.rimraf = function(path) {
-  return new Promise((resolve, reject) => {
-    rimraf(path, err => {
-      if (!err) {
-        resolve(true)
       } else {
         reject(err)
       }

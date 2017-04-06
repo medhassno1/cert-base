@@ -1,7 +1,8 @@
 const fs = require('fs')
 const path = require('path')
+const { emp } = require('emp')
 const Pem = require('./pem.js')
-const { writeFile, readFile, readDir, rimraf } = require('./utils.js')
+const { writeFile, readFile, readDir } = require('./utils.js')
 const { CA_EXIST, CA_NOT_EXIST } = require('./errors.js')
 
 /**
@@ -18,9 +19,9 @@ const caSSLCnfPath = path.join(__dirname, '../configs/ca.ext')
 const userSSLCnfPath = path.join(__dirname, '../configs/user.ext')
 
 /**
- * Certs storing location:
+ * Certs location:
  *
- * CA cert also known as 'root cert' is stored along with CA key under:
+ * CA cert also known as 'root cert' is stored with CA key under:
  * ${this.path}/##ca##
  *
  * User certs are stored along with keys under:
@@ -107,13 +108,13 @@ class CertBase {
   }
 
   async removeAllCerts() {
-    const result = await rimraf(this.path)
-    return result
+    await emp(this.path)
+    return true
   }
 
   async removeCert(hostname) {
-    const result = await rimraf(this._makeFolderPath(hostname))
-    return result
+    await emp(this._makeFolderPath(hostname), true)
+    return true
   }
 
   async listCerts() {
