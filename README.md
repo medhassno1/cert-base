@@ -123,7 +123,7 @@ The **result** object has `ca` and `certs` 2 fields where
 - **ca** is the commonName of the ca cert
 - **certs** is an array of the user certs name
 
-## About How certs are stored
+## About how certs are stored
 
 The certs are stored under the folder path the user give when calling the constructor function.
 
