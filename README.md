@@ -122,3 +122,20 @@ The **result** object has `ca` and `certs` 2 fields where
 
 - **ca** is the commonName of the ca cert
 - **certs** is an array of the user certs name
+
+## About How certs are stored
+
+The certs are stored under the folder path the user give when calling the constructor function.
+
+For each domain, which contains actually 2 files(`.key` file and `.crt` file) or called a **pair**, the files are placed under a folder named the same as the domain name. Like this:
+
+```
+cert-path/
+  domain1/
+    domain1.key
+    domain1.crt
+  domain2/
+    domain2.key
+    domain2.crt
+  ...
+```
