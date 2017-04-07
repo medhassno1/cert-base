@@ -1,6 +1,6 @@
 {
   "name": "cert-base",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Certification generator and manager",
   "main": "lib/index.js",
   "scripts": {
