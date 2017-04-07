@@ -167,7 +167,7 @@ class CertBase {
   }
   _makePath(name, type) {
     const ext = type === 'cert' ? 'crt' : 'key'
-    return path.join(this._makeFolderPath(name), `${name}-${type}.${ext}`)
+    return path.join(this._makeFolderPath(name), `${name}.${ext}`)
   }
   _makeFolderPath(name) {
     return path.join(this.path, `${name}`)
