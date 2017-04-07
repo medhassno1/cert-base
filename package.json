@@ -1,13 +1,12 @@
 {
   "name": "cert-base",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "Certification generator and manager",
   "main": "lib/index.js",
   "scripts": {
     "dev": "babel -w ./src --out-dir lib",
     "build": "babel ./src --out-dir lib",
-    "test": "tape ./test/index.js | tap-notify | tap-diff",
-    "transfer": "tape ./test/transfer-test.js | tap-notify | tap-diff"
+    "test": "tape ./test/index.js | tap-notify | tap-diff"
   },
   "repository": {
     "type": "git",
@@ -34,7 +33,6 @@
   "dependencies": {
     "emp": "^2.0.0",
     "fs-path": "0.0.23",
-    "pem": "^1.9.4",
-    "rimraf": "^2.6.1"
+    "pem": "^1.9.4"
   }
 }

@@ -6,7 +6,7 @@ To install `npm install cert-base`
 
 ## Usage
 
-Here we're going to create a CA certification, and then use it to sign a certification
+Here we're going to create a CA cert, and then use it to sign a cert
 
 ```js
 /**
@@ -19,7 +19,6 @@ const cb = new CertBase({
 
 cb.createCACert('commonName_for_ca')
   .then(result => {
-    // path to generated files
     console.log(result.key, result.cert)
   })
 
@@ -29,7 +28,6 @@ cb.createCACert('commonName_for_ca')
 
 cg.getCertByHost('commonName_for_hostname')
   .then(result => {
-    // path to generated files
     console.log(result.key, result.cert)
   })
 ```
@@ -45,15 +43,18 @@ const cb = new CertBase({
     country: 'CN',
     organization: 'CertBase',
     organizationUnit: 'CertBase Certification'
-  }
+  },
+  opensslPath: '/path/to/your/openssl'
 })
 ```
 where
 
 - **path** is the folder path you want to store your certs and keys in, regard it as a cert base
-- **subject** is the subject object used when creating CA cert or signing cert by hostname. It has a default settings
+- **subject** is the subject object used when creating CA cert or signing cert by hostname. The default settings is listed below
+- **opensslPath** is the location of the `openssl` executable. This is because you may want to use a custom openssl version instead of the system default `openssl` executable which is the default value of this field
 
 ```js
+// subject default settings
 {
   country: 'CN',
   organization: 'CertBase',
@@ -70,18 +71,13 @@ cb.createCACert(commonName)
   .then(result => {
     // result object has 2 fields:
     //
-    // key : the generated key file path
-    // cert: the generated cert file path
-
-    // do what you want with result
+    // key : the generated key content
+    // cert: the generated cert content
   })
 ```
 where
-- **commonName** is the commonName for the CA cert, give it whatever you want
 
-This method returns a promise
-
-For more subject options, check [here](https://github.com/Dexus/pem#create-a-certificate-signing-request), because inside this package we use **pem** to do all those openssl work
+- **commonName** is the commonName field for the CA cert
 
 ### Check if CA cert exist
 
@@ -96,31 +92,33 @@ Before you call this method, you must have a ca cert generated, or it will throw
 
 ```js
 cb.getCertByHost(hostname)
-  .then(result => {
-    // same as above
-  })
+  .then(result => {})
 ```
 where
-- **subject** is the same as the above method, give your hostname to `commonName` field
-
-This method returns a promise
+- **hostname** is the commonName field for your cert
 
 ### Remove all certs
 
 ```js
-cb.removeAllCerts()
-  .then(() => {
-
-  })
+cb.removeAllCerts().then()
 ```
-This method returns a promise
+Literally you don't need any description here
 
 ### Remove cert by hostname
 
 ```js
-cb.removeCert(hostname)
-  .then(() => {
-
-  })
+cb.removeCert(hostname).then()
 ```
-This method returns a promise
+No, no description either
+
+### List all certs
+
+```js
+cb.listCerts()
+  .then(result => {})
+```
+
+The **result** object has `ca` and `certs` 2 fields where
+
+- **ca** is the commonName of the ca cert
+- **certs** is an array of the user certs name
