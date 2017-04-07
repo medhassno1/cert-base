@@ -88,14 +88,17 @@ returns `true` or `false`
 
 ### Sign a cert by hostname
 
-Before you call this method, you must have a ca cert generated, or it will throw an error
+Before you call this method, you must have a ca cert generated, or an error will be thrown
 
 ```js
 cb.getCertByHost(hostname)
   .then(result => {})
 ```
 where
+
 - **hostname** is the commonName field for your cert
+
+If you had the same hostname cert generated before, it will use that cert and won't generate a new one
 
 ### Remove all certs
 
