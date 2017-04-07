@@ -137,6 +137,7 @@ test('listCerts: 1 user certs', function(t) {
       throw e
     })
 })
+
 test('removeCert', function(t) {
   t.plan(1)
 

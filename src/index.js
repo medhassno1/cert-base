@@ -80,9 +80,12 @@ class CertBase {
   async getCertByHost(hostname) {
     // if exist, return current cert and key
     if (this._isExist(hostname)) {
+      const key = await readFile(this._makePath(hostname, 'key'))
+      const cert = await readFile(this._makePath(hostname, 'cert'))
+
       return {
-        key: this._makePath(hostname, 'key'),
-        cert: this._makePath(hostname, 'cert')
+        key: key,
+        cert: cert
       }
     }
     
