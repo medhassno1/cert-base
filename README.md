@@ -132,10 +132,13 @@ If no ca cert exists, returns an empty Object `{}`
 
 The certs are stored under the folder path the user give when calling the constructor function.
 
-For each domain, which contains actually 2 files(`.key` file and `.crt` file) or called a **pair**, the files are placed under a folder named the same as the domain name. Like this:
+For each domain, which contains actually 2 files(`.key` file and `.crt` file) or called a **pair**, the files are placed under a folder named the same as the domain name. Like this (CA certs file are named as `##ca##`):
 
 ```
 cert-path/
+  ##ca##/
+    ##ca##.key
+    ##ca##.crt
   domain1/
     domain1.key
     domain1.crt
