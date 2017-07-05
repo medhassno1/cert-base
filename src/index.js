@@ -132,7 +132,12 @@ class CertBase {
           certs: []
         }
         
-        certs.certs = files.filter(name => name !== CA_ROOT_NAME)
+        certs.certs = files.filter(name => {
+          const itemPath = path.join(this.path, name)
+          if (name !== CA_ROOT_NAME && fs.statSync(itemPath).isDirectory()) {
+            return true
+          }
+        })
       }
     } catch (e) {}
 
