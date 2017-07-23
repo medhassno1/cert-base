@@ -127,6 +127,21 @@ class CertBase {
   }
 
   /**
+   * List all signed certs using its common name
+   */
+
+  async listSignedCerts() {
+    let certs = []
+    const files = await readDir(this.certsDirPath)
+
+    if (files.length > 0) {
+      certs = files.filter(name => name[0] === '.' ? false : true)
+    }
+
+    return certs
+  }
+
+  /**
    * Removes all certs including ca cert
    */
 

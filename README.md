@@ -100,6 +100,18 @@ where
 
 If you had the same hostname cert generated before, it will use that cert and won't generate a new one
 
+### List all self signed certs
+
+```js
+cb.listSignedCerts().then(certs => {
+  // certs is an array of signed domains
+})
+```
+List all self signed certificates, `certs` is an array like this:
+```js
+['www.google.com', 'github.com', ...]
+```
+
 ### Remove all certs
 
 ```js
