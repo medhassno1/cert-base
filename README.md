@@ -105,45 +105,39 @@ If you had the same hostname cert generated before, it will use that cert and wo
 ```js
 cb.removeAllCerts().then()
 ```
-Literally you don't need any description here
+Removes everything inside the storage directory
 
 ### Remove cert by hostname
 
 ```js
 cb.removeCert(hostname).then()
 ```
-No, no description either
+Removes a self signed cert with a given name
 
-### List all certs
+### Remove all signed certs
 
 ```js
-cb.listCerts()
-  .then(result => {})
+cb.removeAllSignedCerts().then()
 ```
-
-The **result** object has `ca` and `certs` 2 fields where
-
-- **ca** is the commonName of the ca cert
-- **certs** is an array of the user certs name
-
-If no ca cert exists, returns an empty Object `{}`
+Removes all self signed certs(empty `certs` directory)
 
 ## About how certs are stored
 
 The certs are stored under the folder path the user give when calling the constructor function.
 
-For each domain, which contains actually 2 files(`.key` file and `.crt` file) or called a **pair**, the files are placed under a folder named the same as the domain name. Like this (CA certs file are named as `##ca##`):
+Strorage structure:
 
 ```
 cert-path/
-  ##ca##/
-    ##ca##.key
-    ##ca##.crt
-  domain1/
-    domain1.key
-    domain1.crt
-  domain2/
-    domain2.key
-    domain2.crt
-  ...
+  ca/
+    ca.crt
+    ca.key
+  certs/
+    domain1/
+      domain1.crt
+      domain1.key
+    domain2/
+      domain2.crt
+      domain2.key
+    ...
 ```

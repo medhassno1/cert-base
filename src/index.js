@@ -9,7 +9,6 @@ const { CA_EXIST, CA_NOT_EXIST } = require('./errors.js')
  * Constants
  */
 
-const CA_ROOT_NAME = '##ca##'
 const defaultSubject = {
   country: 'CN',
   organization: 'CertBase',
@@ -22,21 +21,30 @@ const userSSLCnfPath = path.join(__dirname, '../configs/user.ext')
  * Certs location:
  *
  * CA cert also known as 'root cert' is stored with CA key under:
- * ${this.path}/##ca##
+ * ${this.path}/ca/
  *
  * User certs are stored along with keys under:
- * ${this.path}/${hostname}
+ * ${this.path}/certs/${hostname}/
  */
 
 class CertBase {
   constructor(options) {
-    this.path = options.path
     this.defaultSubject = {
       ...defaultSubject,
       ...options.subject
     }
     this.pem = new Pem(options.opensslPath)
+    
+    this.path = options.path
+    this.caDirPath = path.join(options.path, 'ca')
+    this.caCertPath = path.join(this.caDirPath, 'ca.crt')
+    this.caKeyPath = path.join(this.caDirPath, 'ca.key')
+    this.certsDirPath = path.join(options.path, 'certs')
   }
+
+  /**
+   * Create a CA cert, if exists, throw error
+   */
 
   async createCACert(commonName) {
     // if ca cert exist, error
@@ -61,12 +69,16 @@ class CertBase {
     return this._save(certData)
   }
 
+  /**
+   * Get CA cert data, if not exist, throws an error
+   */
+
   async getCACert() {
     let key, cert
 
     if (this.isCAExist()) {
-      key = await readFile(this._makePath(CA_ROOT_NAME, 'key'))
-      cert = await readFile(this._makePath(CA_ROOT_NAME, 'cert'))
+      key = await readFile(this.caKeyPath)
+      cert = await readFile(this.caCertPath)
     } else {
       throw CA_NOT_EXIST
     }
@@ -76,6 +88,10 @@ class CertBase {
       cert: cert
     }
   }
+
+  /**
+   * Get cert data for the given hostname, if not exist, create one
+   */
 
   async getCertByHost(hostname) {
     // if exist, return current cert and key
@@ -110,75 +126,90 @@ class CertBase {
     return this._save(certData, hostname)
   }
 
+  /**
+   * Removes all certs including ca cert
+   */
+
   async removeAllCerts() {
     await emp(this.path)
-    return true
   }
+
+  /**
+   * Remove a signed cert according to the given hostname
+   */
 
   async removeCert(hostname) {
-    await emp(this._makeFolderPath(hostname), true)
-    return true
+    const folderPath = path.join(this.certsDirPath, hostname)
+    await emp(folderPath, true)
   }
 
-  async listCerts() {
-    let files, certs = {}
+  /**
+   * Remove all self signed certs
+   */
 
-    try {
-      files = await readDir(this.path)
-
-      if (files.length >= 1) {
-        certs = {
-          ca: CA_ROOT_NAME,
-          certs: []
-        }
-        
-        certs.certs = files.filter(name => {
-          const itemPath = path.join(this.path, name)
-          if (name !== CA_ROOT_NAME && fs.statSync(itemPath).isDirectory()) {
-            return true
-          }
-        })
-      }
-    } catch (e) {}
-
-    return certs
+  async removeAllSignedCerts() {
+    await emp(this.certsDirPath)
   }
+
+  /**
+   * Check if CA is already exist, return Boolean
+   */
 
   isCAExist() {
-    return this._isExist()
+    return fs.existsSync(this.caKeyPath) && 
+           fs.existsSync(this.caCertPath)
   }
 
-  // utils
+  
+  /**
+   * Util private methods
+   */
 
-  async _save(certData, name=CA_ROOT_NAME) {
-    const keyFileData = {
-      content: certData.clientKey,
-      path: this._makePath(name, 'key')
+  async _save(certData, name) {
+    let key = ''
+    let cert = ''
+
+    // ca save
+    if (!name) {
+      const keyFileData = {
+        content: certData.clientKey,
+        path: this.caKeyPath
+      }
+      const certFileData = {
+        content: certData.certificate,
+        path: this.caCertPath
+      }
+
+      key = await writeFile(keyFileData)
+      cert = await writeFile(certFileData)
+    } else {
+      const keyFileData = {
+        content: certData.clientKey,
+        path: this._makePath(name, 'key')
+      }
+      const certFileData = {
+        content: certData.certificate,
+        path: this._makePath(name, 'cert')
+      }
+      
+      key = await writeFile(keyFileData)
+      cert = await writeFile(certFileData)
     }
-    const certFileData = {
-      content: certData.certificate,
-      path: this._makePath(name, 'cert')
-    }
-    
-    const key = await writeFile(keyFileData)
-    const cert = await writeFile(certFileData)
+
     
     return {
       key: key,
       cert: cert
     }
   }
-  _isExist(name=CA_ROOT_NAME) {
+  _isExist(name) {
     const keyPath = this._makePath(name, 'key')
     const certPath = this._makePath(name, 'cert')
     return fs.existsSync(keyPath) && fs.existsSync(certPath)
   }
-  _makePath(name, type) {
+  _makePath(hostname, type) {
     const ext = type === 'cert' ? 'crt' : 'key'
-    return path.join(this._makeFolderPath(name), `${name}.${ext}`)
-  }
-  _makeFolderPath(name) {
-    return path.join(this.path, `${name}`)
+    return path.join(this.certsDirPath, hostname, `${hostname}.${ext}`)
   }
 }
 

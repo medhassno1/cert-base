@@ -29,8 +29,8 @@ test('removeAllCerts: prepare test environment', function(t) {
   t.plan(1)
 
   cb.removeAllCerts()
-    .then(result => {
-      t.equal(result, true)
+    .then(() => {
+      t.pass('All removed')
     })
     .catch(e => {
       throw e
@@ -50,17 +50,6 @@ test('getCACert: no CA exists', function(t) {
   t.plan(1)
   cb.getCACert()
     .catch(e => t.ok(e))
-})
-test('listCerts: no cert exist', function(t) {
-  t.plan(1)
-
-  cb.listCerts()
-    .then(result => {
-      t.notOk(result.ca, 'no certs')
-    })
-    .catch(e => {
-      throw e
-    })
 })
 
 // create CA
@@ -95,18 +84,6 @@ test('getCACert: CA exists', function(t) {
       throw e
     })
 })
-test('listCerts: only ca exist', function(t) {
-  t.plan(2)
-
-  cb.listCerts()
-    .then(result => {
-      t.ok(result.ca, 'ca cert')
-      t.ok(result.certs.length === 0, 'no user cert')
-    })
-    .catch(e => {
-      throw e
-    })
-})
 
 /**
  * Cert signing methods
@@ -125,29 +102,13 @@ test('getCertByHost', function(t) {
     })
 })
 
-test('listCerts: 1 user certs', function(t) {
-  t.plan(2)
-
-  cb.listCerts()
-    .then(result => {
-      t.ok(result.ca, 'ca cert')
-      t.ok(result.certs.length > 0, 'user cert')
-    })
-    .catch(e => {
-      throw e
-    })
-})
-
 test('removeCert', function(t) {
-  t.plan(1)
-
   cb.removeCert(TEST_HOSTNAME)
-    .then(result => {
-      t.equal(result, true)
-    })
     .catch(e => {
       throw e
     })
+  
+  t.end()
 })
 
 /**
