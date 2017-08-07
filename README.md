@@ -1,6 +1,6 @@
 # cert-base
 
-Certification management tool using openssl wrapper **pem** to create and sign certifications
+Certificates management tool using openssl wrapper **pem** to create and sign certificates
 
 To install `npm install cert-base`
 
